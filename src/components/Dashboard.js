@@ -1,14 +1,23 @@
 import React, { useState, useEffect } from 'react'
 import { db } from './Firebase';
 import { ref, set } from "firebase/database";
-import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
+import { getAuth, signInWithEmailAndPassword, setPersistence, browserSessionPersistence } from "firebase/auth";
+import Login from './Login';
 
 const Dashboard = ({ removeButton, testDB, button, buttonText, setIsDisplayed, isDisplayed, hasPlayer, hasChat }) => {
+
     const auth = getAuth();
     const [signedUser, setSignedUser] = useState(auth.currentUser);
     const [signinError, setSigninError] = useState("");
 
+    auth.onAuthStateChanged(user => {
+        setSignedUser(user);
+    })
+
+
     useEffect(() => {
+
+
 
     }, [signedUser]);
 
@@ -33,19 +42,23 @@ const Dashboard = ({ removeButton, testDB, button, buttonText, setIsDisplayed, i
     };
 
     const setPlayer = () => {
+
         if (hasPlayer) {
             set(ref(db, "hasPlayer"), false);
         } else {
             set(ref(db, "hasPlayer"), true);
         }
+
     };
 
     const setChat = () => {
+
         if (hasChat) {
             set(ref(db, "hasChat"), false);
         } else {
             set(ref(db, "hasChat"), true);
         }
+
     }
 
     const mainDashboard = () => {
@@ -102,28 +115,10 @@ const Dashboard = ({ removeButton, testDB, button, buttonText, setIsDisplayed, i
 
     const login = () => {
         return (
-            <section className="dashboard">
-                <div className="login-form">
-                    <h3>Login</h3>
-                    <span className={signinError ? "error show" : "error"}> {signinError ? signinError : null} </span>
-
-                    <form action="" onSubmit={signIn}>
-
-                        <div className="input">
-                            <label htmlFor="user" >Usuario</label>
-                            <input type="text" id="user" name="user" required />
-                        </div>
-
-                        <div className="input">
-                            <label htmlFor="pass" >Password</label>
-                            <input type="password" id="pass" name="pass" required />
-                        </div>
-                        <button type="submit"> Login </button>
-                    </form>
-                </div>
-
-
-            </section>
+            <Login
+                signIn={signIn}
+                signinError={signinError}
+            />
         )
     };
 
@@ -135,25 +130,33 @@ const Dashboard = ({ removeButton, testDB, button, buttonText, setIsDisplayed, i
         const email = e.target.user.value;
         const password = e.target.pass.value;
 
-        signInWithEmailAndPassword(auth, email, password)
-            .then((userCredential) => {
-                // Signed in 
-                const user = userCredential.user;
-                e.target.reset();
-                setSignedUser(user);
+        setPersistence(auth, browserSessionPersistence)
+            .then(() => {
 
-                // ...
+                return signInWithEmailAndPassword(auth, email, password)
+                    .then((userCredential) => {
+                        // Signed in 
+                        const user = userCredential.user;
+                        e.target.reset();
+                        setSignedUser(user);
+                        console.log(user);
+
+                        // ...
+                    })
+                    .catch((error) => {
+                        const errorCode = error.code;
+                        if (errorCode === "auth/invalid-email") {
+                            setSigninError("Usuario invalido");
+                        } else if (errorCode === "auth/wrong-password") {
+                            setSigninError("Password Equivocado");
+                        }
+                    });
+
             })
-            .catch((error) => {
-                const errorCode = error.code;
-                if (errorCode === "auth/invalid-email") {
-                    setSigninError("Usuario invalido");
-                } else if (errorCode === "auth/wrong-password") {
-                    setSigninError("Password Equivocado");
-                }
-            });
 
-    }
+
+
+    };
 
     const buttonPreview = () => {
 

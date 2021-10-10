@@ -98,6 +98,8 @@ button{
     justify-content: space-around;
 }
 
+
+
 .dashboard-element{
     background:white;
     box-shadow:0 0 10px hsl(0 0% 75%);
@@ -146,6 +148,20 @@ button{
     margin-bottom:1rem;
     padding:0 1rem;
 }
+
+
+@media screen and (max-width:900px){
+
+    .dashboard{
+        flex-direction: column;
+    }
+    .dashboard-element{
+        flex-basis: 100%;
+        width:100%;
+    }
+}
+
+
 
 .button-preview{
     background:rgb(11, 184, 169);

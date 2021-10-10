@@ -70,7 +70,7 @@ function App() {
     set(ref(db, "displayed"), false);
   }
 
-  const button = <a href={buttonText.url}><button>{buttonText.text}</button></a>;
+  const button = <a href={buttonText.url} target="_blank" rel="noreferrer"><button>{buttonText.text}</button></a>;
 
 
 
